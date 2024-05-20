@@ -99,7 +99,7 @@ function App() {
             changeNameHandler = {changePlayerNamehandler}
           />
           <Player
-            initialName={PLAYER.Y}
+            initialName={PLAYER.O}
             symbol="O"
             isActive={activePlayer === "O"}
             changeNameHandler = {changePlayerNamehandler}
