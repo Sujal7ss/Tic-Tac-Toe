@@ -7,6 +7,7 @@ function ToggleButton() {
         <div className="box">
           <Link to='/'  class="link">Play Offline</Link>
           <Link to='/computer' class="link">VS AI</Link>
+          <Link to='/online' class="link">Multiplayer</Link>
         </div>
       </div>
     </>

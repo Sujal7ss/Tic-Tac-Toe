@@ -4,16 +4,17 @@ import GameBoard from "../components/GameBoard";
 import Log from "../components/Log";
 import WINNING_COMBINATIONS from "../components/winning";
 import GameOver from "../components/GameOver";
+import ToggleButton from "../components/ToggleButton"
 
 const PLAYER = {
-  'X': "Player 1",
-  'O': "Player 2"
-}
+  X: "Player 1",
+  O: "Player 2",
+};
 const INITIAL_GAME_BOARD = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
-]
+];
 function deriveActivePlayer(gameTurns) {
   let activePlayer = "X";
 
@@ -22,9 +23,8 @@ function deriveActivePlayer(gameTurns) {
   }
   return activePlayer;
 }
-function deriveGameBoard(gameTurns)
-{
-  let gameBoard = [...INITIAL_GAME_BOARD.map(Array => [...Array])];
+function deriveGameBoard(gameTurns) {
+  let gameBoard = [...INITIAL_GAME_BOARD.map((Array) => [...Array])];
   for (const turn of gameTurns) {
     const { square, player } = turn;
     const { row, col } = square;
@@ -33,18 +33,20 @@ function deriveGameBoard(gameTurns)
   }
   return gameBoard;
 }
-function deriveWinner(player, gameBoard){
+function deriveWinner(player, gameBoard) {
   let winner;
   for (const combination of WINNING_COMBINATIONS) {
     const firstSquare = gameBoard[combination[0].row][combination[0].column];
     const secondSquare = gameBoard[combination[1].row][combination[1].column];
     const thirdSquare = gameBoard[combination[2].row][combination[2].column];
 
-    if(firstSquare && firstSquare === secondSquare && secondSquare === thirdSquare)
-      {
-        winner = player[firstSquare];
-      }
-
+    if (
+      firstSquare &&
+      firstSquare === secondSquare &&
+      secondSquare === thirdSquare
+    ) {
+      winner = player[firstSquare];
+    }
   }
   return winner;
 }
@@ -55,12 +57,13 @@ const OfflineGame = () => {
 
   const activePlayer = deriveActivePlayer(gameTurns);
 
-  
   const gameBoard = deriveGameBoard(gameTurns);
-  
-  const winner = deriveWinner(player ,gameBoard);
+
+  const winner = deriveWinner(player, gameBoard);
   let hasDraw = false;
-  if(gameTurns.length === 9 && !winner) {hasDraw = true;}
+  if (gameTurns.length === 9 && !winner) {
+    hasDraw = true;
+  }
 
   function turnHandler(rowIndex, colIndex) {
     updateTurns((prevTurns) => {
@@ -75,42 +78,46 @@ const OfflineGame = () => {
       return currTurn;
     });
   }
-  function restartGame(){
-    updateTurns([])
+  function restartGame() {
+    updateTurns([]);
   }
 
-  function changePlayerNamehandler(symbol, newName) 
-  {
-    changePlayerName(prevPlayers => {
+  function changePlayerNamehandler(symbol, newName) {
+    changePlayerName((prevPlayers) => {
       return {
         ...prevPlayers,
-        [symbol] : newName
+        [symbol]: newName,
       };
-    })
+    });
   }
   return (
-    <main>
-      <div id="game-container">
-        <ol id="players" className="highlight-player">
-          <Player
-            initialName={PLAYER.X}
-            symbol="X"
-            isActive={activePlayer === "X"}
-            changeNameHandler = {changePlayerNamehandler}
-          />
-          <Player
-            initialName={PLAYER.O}
-            symbol="O"
-            isActive={activePlayer === "O"}
-            changeNameHandler = {changePlayerNamehandler}
-          />
-        </ol>
-        {(winner || hasDraw) && <GameOver winner={winner} restartGame={restartGame}/>}
-        <GameBoard onSelection={turnHandler} board = {gameBoard} />
-      </div>
-      <Log turns={gameTurns} />
-    </main>
+    <>
+    <ToggleButton />
+      <main>
+        <div id="game-container">
+          <ol id="players" className="highlight-player">
+            <Player
+              initialName={PLAYER.X}
+              symbol="X"
+              isActive={activePlayer === "X"}
+              changeNameHandler={changePlayerNamehandler}
+            />
+            <Player
+              initialName={PLAYER.O}
+              symbol="O"
+              isActive={activePlayer === "O"}
+              changeNameHandler={changePlayerNamehandler}
+            />
+          </ol>
+          {(winner || hasDraw) && (
+            <GameOver winner={winner} restartGame={restartGame} />
+          )}
+          <GameBoard onSelection={turnHandler} board={gameBoard} />
+        </div>
+        <Log turns={gameTurns} />
+      </main>
+    </>
   );
-}
+};
 
 export default OfflineGame;
