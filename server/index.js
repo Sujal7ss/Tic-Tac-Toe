@@ -21,29 +21,31 @@ app.get("/", (req, res) => {
 });
 
 io.on('connection', async (socket)=> {
-  console.log('a user connected');
 
-  socket.emit("newRoom", Math.floor(Math.random() * 10000), (response) => {
-    if(response.success) {
-      socket.join(response.room);
-    }
-    io.to(response.room).emit("RoomMsg", `joined room ${response.room}`) //"got it"
+
+  socket.on('send-msg', (data) => {
+    socket.to(data.room).emit('msg', data.msg);
   });
 
-  socket.on("joinRoom", (room) => {
-    socket.join(room);
-    io.to(room).emit("joinedRoom", `joined room ${room}`);
-    console.log(room);
+  socket.on('join-room', (roomId) => {
+    socket.join(roomId);
   });
 
-  socket.on("msg", (msg) => {
-    io.to(msg.room).emit("move", "moved")
-   })
-  
-  socket.on("move", (msg) => {
-    console.log(msg);
-    io.to(msg.room).emit("move", msg);
+  socket.on('player-join', (roomId) => {
+    
+    socket.join(roomId);
+
+    socket.to(roomId).emit('player-joined', roomId);
   });
+
+  socket.on('turn', (data) => {
+    socket.to(data.roomId).emit('turn', data);
+  });
+
+  socket.on('restart', (data) => {
+    socket.to(data.roomId).emit('restart', data);
+  });
+
 })
 
 server.listen(8080, () => {
