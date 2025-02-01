@@ -17,7 +17,7 @@ const io = new Server(server, {
 });
 
 app.get("/", (req, res) => {
-  res.json({ run: 200 });
+  res.json({ message: "Welcome To Tic-Tac-Toe"});
 });
 
 io.on('connection', async (socket)=> {
