@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 
+const PORT = process.env.PORT || 8000
 const randomRoomId = () => {
   return Math.floor(Math.random() * 10000);
 };
@@ -12,7 +13,7 @@ const server = createServer(app);
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
   },
 });
 
@@ -48,6 +49,6 @@ io.on('connection', async (socket)=> {
 
 })
 
-server.listen(8080, () => {
+server.listen(PORT, () => {
   console.log("server running at http://localhost:8080");
 });
