@@ -1,84 +1,104 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../socket";
+import OnlineGameBoard from "./OnlineGameBoard";
+
 
 export const Multiplayer = () => {
   const navigate = useNavigate();
-  const [roomId, updateRoomId] = useState(1232);
-  const [joinRoomId, updateJoinRoomId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [roomId, setRoom] = useState("");
+  const [currentRoomId, setCurrentRoomId] = useState(
+    Math.floor(Math.random() * 10000).toString()
+  );
 
-  socket.on("hello", (arg, callback) => {
-    console.log(arg); // "world"
-    callback("got it");
-  });
+
+  const [play, setPlay] = useState(false);
+  const [myTurn, setMyTurn] = useState(false);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log(socket.id);
+    socket.on("connect", (scoket) => {
+      console.log("connected", socket.id);
     });
-    return () => {};
+
+    socket.on("msg", (msg) => {
+      console.log(msg);
+    });
+
+    socket.on("player-joined", (roomId) => {
+      setPlay(true);
+      setMyTurn(true);
+      setRoom(currentRoomId);
+      console.log("player joined", roomId);
+    });
+
+    socket.emit("join-room", currentRoomId);
+
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, []);
 
-  socket.on("RoomMsg", (msg) => {console.log(msg)});
-
-  socket.on("newRoom", (arg, callback) => {
-    updateRoomId(arg);
-    callback({ room: arg, success: true });
-  });
-
-  
-
-  socket.on("joinedRoom", (msg) => {
-    navigate("/");
-    console.log(msg);
-  });
-
-  function joinRoom(room) {}
-  function handleSubmit(e, input) {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  }
 
+    socket.emit("send-msg", { msg: message, room: roomId });
+    setMessage("");
+  };
+
+  const handleRoomSubmit = (e) => {
+    e.preventDefault();
+
+    socket.emit("player-join", roomId);
+    setRoom("");
+
+    setPlay(true);
+    setMyTurn(false);
+    setRoom(roomId);
+    console.log(myTurn)
+  };
   return (
     <>
-      <div className="w-full h-96 flex flex-row justify-center items-center">
-        <div className="w-1/2 h-full  items-center">
-          <h1>Multiplayer</h1>
-          <div>
-            <h1>Room id : {roomId}</h1>
-            <h1>Join Room</h1>
-            <input
-              type="text"
-              name="room"
-              value={joinRoomId}
-              onChange={(e) => {
-                updateJoinRoomId(e.target.value);
-              }}
-            ></input>
-            <button onClick={() => socket.emit("joinRoom", joinRoomId)}>
-              Join Room
-            </button>
+      
+      {!play && (
+        <div className="w-1/2 h-96 m-auto flex flex-col items-center justify-center bg-orange backdrop-brightness-50">
+          <h1>Play with friend</h1>
 
-            <button onClick={() => socket.emit("msg", { room: roomId })}>
-              Play
-            </button>
+          <div className="w-full h-full flex items-center justify-around ">
+            <div className="w-1/3 h-full">
+              <h2 className="text-xl ">{`Room id: ${currentRoomId}`}</h2>
+              <h2 className="text-4xl text-gray-700 font-extrabold ">Share</h2>
+            </div>
+
+            <div className="w-1/3 h-full">
+              <form
+                onSubmit={handleRoomSubmit}
+                className="form flex flex-col items-center justify-center gap-4"
+              >
+                <input
+                  type="text"
+                  placeholder="Enter Room Id"
+                  value={roomId}
+                  onChange={(e) => setRoom(e.target.value.toString())}
+                  className="text-black bg-orange-100 h-10 w-40"
+                />
+                <button type="submit">
+                  <h2 className="text-4xl text-gray-700 font-extrabold ">
+                    Join Room{" "}
+                  </h2>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-      {/* <h1>`Room id : {roomId}`</h1>
-      <button onClick={handlePlay}>Play</button> */}
-      {/* <form onSubmit={(e) => handleSubmit(e, input)}>
-        <input
-          type="text"
-          name="turn"
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-          }}
-        ></input>
-        <button  type="submit">
-          Play
-        </button>
-      </form> */}
+      )}
+
+      {play && (
+        <>
+          <OnlineGameBoard myTurn={myTurn} changeTurn={setMyTurn} roomId={roomId}/>
+          
+        </>
+      )}
     </>
   );
 };
